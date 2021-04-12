@@ -1,11 +1,8 @@
 import random
+import timeit
 from collections import Counter
 
-# TODO: generate_mutated_sequence() direkt input file'ın random pozisyonlarına yerleştirebiliyor olsun
-# TODO: fonksiyonlar k: consensus lenth alacak ve buna bağlı mutasyon yerleştirme yapacak
-# TODO: runtime, iteration sayısını raporla
 
-consensus_str = "ACGAGCATCC"
 
 # k: k-mer length
 # generate sequence of length k
@@ -62,6 +59,7 @@ def hamming_distance(seq1, seq2):
     return count
 
 def print_profile_list(profile_list):
+    print("Profile matrix:")
     print("A:", end=" ")
     for i in range(len(profile_list)): print(profile_list[i][0], end=" | ")
     print("\nT:", end=" ")
@@ -147,7 +145,9 @@ def calculate_score(motif_list, consensus_str):
 
 # k: motif length
 def randomized_motif_search(k, Dna):
-
+    
+    start = timeit.default_timer()
+    iteration_num = 1
     motif_list = []
     profile_list = []
 
@@ -163,13 +163,16 @@ def randomized_motif_search(k, Dna):
     
     # calculating score for first matrix
     best_score = calculate_score(motif_list, consensus_str)  
-    print(*motif_list, sep="\n")
-    print("\ninitial score: {}".format(best_score))
+    initial_score = best_score
+    print("Iteration number:", iteration_num)
     print("consensus string: {}\n".format(consensus_str))
+    print("Motif List:")
+    print(*motif_list, sep="\n")
+    print("\ninitial score: {}\n".format(best_score))
 
     while True:
         # generate profile matrix from selected motifs
-        for i in range(10):
+        for i in range(k):
             column_list = []
             for j in range(10): column_list.append(motif_list[j][i])
             base_counts = Counter(column_list)
@@ -179,8 +182,6 @@ def randomized_motif_search(k, Dna):
             C_prob = base_counts['C']/10
             profile_list.append([A_prob, T_prob, G_prob, C_prob])
     
-        print_profile_list(profile_list)
-
         # calculating every possibilities probability for each sequence line
         prob_list = calculate_prob_variations(lines, profile_list, k)
     
@@ -199,27 +200,45 @@ def randomized_motif_search(k, Dna):
         
         new_motif_list = []
 
-        for i in range(k):
+        for i in range(10):
             index = highest_motif_values[i][1]
-            new_motif_list.append(lines[i][index:index+10])
+            new_motif_list.append(lines[i][index:index+k])
 
         # check if score reduced
         # if so replace previous motif matrix with these new ones
         # from these motifs calculate profil once again
         # until it does not reduce score anymore algorithm continues..
-        new_score = calculate_score(new_motif_list, consensus_str)
-        
-        if new_score < best_score:
-            print("new score:", new_score)
+        if calculate_score(new_motif_list, consensus_str) < best_score:
+            new_score = calculate_score(new_motif_list, consensus_str)
+            print("****************************************************")
+            print("Iteration number: ", iteration_num)
+            print("\nNew motif list:", new_motif_list)
+            print("\nnew score:\n", new_score)
+            print_profile_list(profile_list)
             motif_list = new_motif_list[:]
             profile_list = []
             best_score = new_score
         else:
+            print("initial score was:", initial_score)
+            print("best score possible:", best_score)
+            new_score = calculate_score(new_motif_list, consensus_str)
             print("stopped at score:", new_score)
+            print("number of iterations passed:", iteration_num)
             break
-
+        iteration_num += 1
+    
+    stop = timeit.default_timer()
+    print("Runtime of Randomized Motif Search: {}".format(stop-start), "sec")
     return motif_list
 
 
 if __name__ == "__main__":
-    randomized_motif_search(10, "input.txt")
+    
+    #  9-mer consensus string:   CGAGCATCC
+    # 10-mer consensus string:  ACGAGCATCC
+    # 11-mer consensus string: ACGAGCATCCT
+    consensus_str = "CGAGCATCC"
+    
+    # inputs: k-mer length, input file
+    # output: best motif acquired according to algorithm
+    randomized_motif_search(9, "input.txt")
