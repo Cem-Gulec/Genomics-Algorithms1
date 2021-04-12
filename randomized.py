@@ -3,7 +3,6 @@ import timeit
 from collections import Counter
 
 
-
 # k: k-mer length
 # generate sequence of length k
 def generate_sequence(k, bases='ACGT'):
@@ -260,11 +259,6 @@ def randomized_motif_search(k, Dna):
 
 
 if __name__ == "__main__":
-    #  9-mer consensus string:   CGAGCATCC
-    # 10-mer consensus string:  ACGAGCATCC
-    # 11-mer consensus string: ACGAGCATCCT
-    #consensus_str = "CGAGCATCC"
-    
     # inputs: k-mer length, input file
     # output: best motif acquired according to algorithm
     randomized_motif_search(10, "input.txt")

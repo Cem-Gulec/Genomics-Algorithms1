@@ -242,8 +242,4 @@ def Gibbs_Sampler(k, input_file):
 
 
 if __name__ == "__main__":
-    #  9-mer consensus string:   CGAGCATCC
-    # 10-mer consensus string:  ACGAGCATCC
-    # 11-mer consensus string: ACGAGCATCCT
-    # consensus_str = "CGAGCATCC"  # 9luk 10luk ve 11lik için ayrı ayrı ayarlanıyor
     Gibbs_Sampler(9, "input.txt")
