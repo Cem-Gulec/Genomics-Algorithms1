@@ -143,6 +143,28 @@ def calculate_score(motif_list, consensus_str):
     
     return score
 
+def generate_consensus(motif_list):    
+    k = len(motif_list[0])
+    consensus_return = ""
+    for i in range(k):
+        column_list = []
+        for j in range(10): 
+            column_list.append(motif_list[j][i])
+        base_counts = Counter(column_list)
+        A_prob = base_counts['A']
+        T_prob = base_counts['T']
+        G_prob = base_counts['G']
+        C_prob = base_counts['C']
+        highest_val = max([A_prob, T_prob, G_prob, C_prob])
+        index = [A_prob, T_prob, G_prob, C_prob].index(highest_val)
+        
+        if index   == 0: consensus_return += 'A'
+        elif index == 1: consensus_return += 'T'
+        elif index == 2: consensus_return += 'G'
+        elif index == 3: consensus_return += 'C'
+    
+    return consensus_return
+
 # k: motif length
 def randomized_motif_search(k, Dna):
     
@@ -160,6 +182,10 @@ def randomized_motif_search(k, Dna):
     for i in range(10):
         line = list(lines[i])
         motif_list.append(line[rand_locs[i][0]:rand_locs[i][0]+k])
+
+    # declaring consensus string from motif list
+    consensus_str = generate_consensus(motif_list)
+    print("consensus string: ", consensus_str)
     
     # calculating score for first matrix
     best_score = calculate_score(motif_list, consensus_str)  
@@ -209,6 +235,7 @@ def randomized_motif_search(k, Dna):
         # from these motifs calculate profil once again
         # until it does not reduce score anymore algorithm continues..
         if calculate_score(new_motif_list, consensus_str) < best_score:
+            consensus_str = generate_consensus(new_motif_list)
             new_score = calculate_score(new_motif_list, consensus_str)
             print("****************************************************")
             print("Iteration number: ", iteration_num)
@@ -233,12 +260,11 @@ def randomized_motif_search(k, Dna):
 
 
 if __name__ == "__main__":
-    
     #  9-mer consensus string:   CGAGCATCC
     # 10-mer consensus string:  ACGAGCATCC
     # 11-mer consensus string: ACGAGCATCCT
-    consensus_str = "CGAGCATCC"
+    #consensus_str = "CGAGCATCC"
     
     # inputs: k-mer length, input file
     # output: best motif acquired according to algorithm
-    randomized_motif_search(9, "input.txt")
+    randomized_motif_search(10, "input.txt")

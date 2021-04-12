@@ -111,6 +111,27 @@ def roll(massDist): # roll a biased die for prob. list
             return result
         result += 1
 
+def generate_consensus(motif_list):    
+    k = len(motif_list[0])
+    consensus_return = ""
+    for i in range(k):
+        column_list = []
+        for j in range(10): 
+            column_list.append(motif_list[j][i])
+        base_counts = Counter(column_list)
+        A_prob = base_counts['A']
+        T_prob = base_counts['T']
+        G_prob = base_counts['G']
+        C_prob = base_counts['C']
+        highest_val = max([A_prob, T_prob, G_prob, C_prob])
+        index = [A_prob, T_prob, G_prob, C_prob].index(highest_val)
+        
+        if index   == 0: consensus_return += 'A'
+        elif index == 1: consensus_return += 'T'
+        elif index == 2: consensus_return += 'G'
+        elif index == 3: consensus_return += 'C'
+    
+    return consensus_return
 
 # k: motif length
 def Gibbs_Sampler(k, input_file):
@@ -138,7 +159,9 @@ def Gibbs_Sampler(k, input_file):
     for i in range(10):
         line = list(lines[i])
         motif_list.append(line[rand_locs[i][0]:rand_locs[i][0] + k])#########STEP1#########
-
+    
+    consensus_str = generate_consensus(motif_list)
+    print("consensus string: ", consensus_str)
     best_score = calculate_score(motif_list, consensus_str)#best initial score before iterations
     print("best score initial:")
     print(best_score)
@@ -196,7 +219,9 @@ def Gibbs_Sampler(k, input_file):
         for i in range(len(motifs)):
             line = list(motifs[i])
             motif_list.append(line)
-
+        
+        consensus_str = generate_consensus(motifs)
+        print("consensus string: ", consensus_str)
         print("Final Motif List:",motifs)
         new_score = calculate_score(motifs, consensus_str)
         print("new score: ", new_score)
@@ -220,6 +245,5 @@ if __name__ == "__main__":
     #  9-mer consensus string:   CGAGCATCC
     # 10-mer consensus string:  ACGAGCATCC
     # 11-mer consensus string: ACGAGCATCCT
-    consensus_str = "CGAGCATCC"  # 9luk 10luk ve 11lik için ayrı ayrı ayarlanıyor
+    # consensus_str = "CGAGCATCC"  # 9luk 10luk ve 11lik için ayrı ayrı ayarlanıyor
     Gibbs_Sampler(9, "input.txt")
-    print("consensus str:", consensus_str)
