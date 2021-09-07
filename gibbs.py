@@ -101,13 +101,13 @@ def calculate_score(motif_list, consensus_str): #calculate total hamming distanc
 
     return score
 
-def roll(massDist): # roll a biased die for prob. list
-    randRoll = random.uniform(0,sum(massDist))  #
+def die(list): # roll a biased die for prob. list
+    die = random.uniform(0,sum(list))  #
     sumi = 0
     result = 1
-    for mass in massDist:
-        sumi += mass
-        if randRoll < sumi:
+    for s in list:
+        sumi += s
+        if die < sumi:
             return result
         result += 1
 
@@ -165,7 +165,7 @@ def Gibbs_Sampler(k, input_file):
     best_score = calculate_score(motif_list, consensus_str)#best initial score before iterations
     print("best score initial:")
     print(best_score)
-
+    initial_score=best_score
 
     while(N<1000): # 1000 iteration process on motif list
 
@@ -204,7 +204,7 @@ def Gibbs_Sampler(k, input_file):
 
 
 
-        indeks = roll(probablity_list)-1 # index come from die process
+        indeks = die(probablity_list)-1 # index come from die process
 
         for i in range(len(motif_list)):
             line= "".join(motif_list[i])
@@ -223,6 +223,7 @@ def Gibbs_Sampler(k, input_file):
         consensus_str = generate_consensus(motifs)
         print("consensus string: ", consensus_str)
         print("Final Motif List:",motifs)
+        print("best score initial:",initial_score)
         new_score = calculate_score(motifs, consensus_str)
         print("new score: ", new_score)
         if new_score < best_score:
@@ -237,9 +238,14 @@ def Gibbs_Sampler(k, input_file):
 
         if threshold==500: # stop when the best score repeats more then 500 times
             break
+    print("number of iterations:",N)
     stop = timeit.default_timer()
     print("Runtime of Randomized Motif Search: {}".format(stop-start), "sec")
 
 
 if __name__ == "__main__":
-    Gibbs_Sampler(9, "input.txt")
+    #  9-mer consensus string:   CGAGCATCC
+    # 10-mer consensus string:  ACGAGCATCC
+    # 11-mer consensus string: ACGAGCATCCT
+    # consensus_str = "CGAGCATCC"  #
+    Gibbs_Sampler(11, "input.txt")
